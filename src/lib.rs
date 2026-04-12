@@ -25,5 +25,6 @@ pub mod practice;
 pub mod resolution;
 pub mod scoring;
 pub mod types;
+pub mod value_argument;
 
 pub use error::Error;
