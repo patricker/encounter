@@ -50,11 +50,9 @@ pub fn resolve_value_argument(input: &ValueArgumentInput) -> ValueArgumentResult
         (input.defender.clone(), input.attacker.clone())
     };
 
-    let conviction_gap =
-        (input.attacker_conviction - input.defender_conviction).abs();
+    let conviction_gap = (input.attacker_conviction - input.defender_conviction).abs();
 
-    let loser_value_shift =
-        (conviction_gap * input.defender_openness).clamp(0.0, 1.0);
+    let loser_value_shift = (conviction_gap * input.defender_openness).clamp(0.0, 1.0);
 
     let winner_value_shift = (conviction_gap * 0.1).clamp(0.0, 0.1);
 

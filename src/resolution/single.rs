@@ -16,15 +16,13 @@ impl SingleExchange {
         available: &[ScoredAffordance<P>],
         acceptance: &dyn AcceptanceEval<P>,
     ) -> EncounterResult {
-        let mut result = EncounterResult::new(
-            vec![initiator.into(), responder.into()],
-            None,
-        );
+        let mut result = EncounterResult::new(vec![initiator.into(), responder.into()], None);
 
-        let Some(best) = available
-            .iter()
-            .max_by(|a, b| a.score.partial_cmp(&b.score).unwrap_or(std::cmp::Ordering::Equal))
-        else {
+        let Some(best) = available.iter().max_by(|a, b| {
+            a.score
+                .partial_cmp(&b.score)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        }) else {
             return result;
         };
 

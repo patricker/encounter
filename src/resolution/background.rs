@@ -65,9 +65,17 @@ impl SchemeState {
     }
 
     /// Convert resolved scheme to EncounterResult with one beat.
-    pub fn to_result(&self, success_effects: Vec<Effect>, failure_effects: Vec<Effect>) -> EncounterResult {
+    pub fn to_result(
+        &self,
+        success_effects: Vec<Effect>,
+        failure_effects: Vec<Effect>,
+    ) -> EncounterResult {
         let success = self.phase == SchemePhase::Resolved;
-        let effects = if success { success_effects } else { failure_effects };
+        let effects = if success {
+            success_effects
+        } else {
+            failure_effects
+        };
         let mut result = EncounterResult::new(
             vec![self.initiator.clone(), self.target.clone()],
             Some(self.scheme_type.clone()),

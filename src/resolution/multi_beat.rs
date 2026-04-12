@@ -28,10 +28,7 @@ impl MultiBeat {
             DurationPolicy::UntilResolved => usize::MAX,
         };
 
-        let mut result = EncounterResult::new(
-            participants.to_vec(),
-            Some(practice.name.clone()),
-        );
+        let mut result = EncounterResult::new(participants.to_vec(), Some(practice.name.clone()));
 
         // Filter catalog to affordances allowed by the practice.
         let allowed: Vec<CatalogEntry<P>> = catalog
@@ -48,10 +45,11 @@ impl MultiBeat {
             let responder = &participants[responder_idx];
 
             let scored = scorer.score_actions(speaker, &allowed, participants);
-            let Some(best) = scored
-                .iter()
-                .max_by(|a, b| a.score.partial_cmp(&b.score).unwrap_or(std::cmp::Ordering::Equal))
-            else {
+            let Some(best) = scored.iter().max_by(|a, b| {
+                a.score
+                    .partial_cmp(&b.score)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            }) else {
                 break;
             };
 
@@ -62,7 +60,9 @@ impl MultiBeat {
                 best.entry.spec.effects_on_reject.clone()
             };
 
-            let exit_requested = effects.iter().any(|e| matches!(e, Effect::PracticeExit { .. }));
+            let exit_requested = effects
+                .iter()
+                .any(|e| matches!(e, Effect::PracticeExit { .. }));
 
             let beat = Beat {
                 actor: speaker.clone(),

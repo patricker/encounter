@@ -18,9 +18,12 @@ impl ActionScorer<String> for FixedScorer {
             .map(|entry| ScoredAffordance {
                 entry: entry.clone(),
                 score: self.0,
-                bindings: [("self".into(), actor.into()), ("target".into(), "other".into())]
-                    .into_iter()
-                    .collect(),
+                bindings: [
+                    ("self".into(), actor.into()),
+                    ("target".into(), "other".into()),
+                ]
+                .into_iter()
+                .collect(),
             })
             .collect()
     }

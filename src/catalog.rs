@@ -1,7 +1,7 @@
 //! Catalog loader: reads `.toml` + `.fabula` file pairs from a directory tree.
 
-use crate::affordance::{AffordanceSpec, CatalogEntry};
 use crate::Error;
+use crate::affordance::{AffordanceSpec, CatalogEntry};
 use std::fs;
 use std::path::Path;
 
@@ -20,12 +20,11 @@ fn load_dir_recursive(dir: &Path, entries: &mut Vec<CatalogEntry<String>>) -> Re
             load_dir_recursive(&path, entries)?;
         } else if path.extension().map(|e| e == "toml").unwrap_or(false) {
             let toml_content = fs::read_to_string(&path)?;
-            let spec: AffordanceSpec = toml::from_str(&toml_content).map_err(|e| {
-                Error::CatalogParse {
+            let spec: AffordanceSpec =
+                toml::from_str(&toml_content).map_err(|e| Error::CatalogParse {
                     path: path.display().to_string(),
                     reason: e.to_string(),
-                }
-            })?;
+                })?;
 
             let fabula_path = path.with_extension("fabula");
             let precondition = if fabula_path.exists() {

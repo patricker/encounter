@@ -37,9 +37,12 @@ fn make_reveal_secret() -> ScoredAffordance<String> {
             precondition: String::new(),
         },
         score: 0.8,
-        bindings: [("self".into(), "alice".into()), ("target".into(), "bob".into())]
-            .into_iter()
-            .collect(),
+        bindings: [
+            ("self".into(), "alice".into()),
+            ("target".into(), "bob".into()),
+        ]
+        .into_iter()
+        .collect(),
     }
 }
 

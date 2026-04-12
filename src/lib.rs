@@ -84,10 +84,10 @@ pub mod value_argument;
 
 pub use affordance::{AffordanceSpec, CatalogEntry};
 pub use error::Error;
-pub use escalation::{check_escalation, EscalationRequest, FidelityHint};
+pub use escalation::{EscalationRequest, FidelityHint, check_escalation};
 pub use practice::{DurationPolicy, PracticeSpec, TurnPolicy};
-pub use resolution::SingleExchange;
 pub use resolution::MultiBeat;
+pub use resolution::SingleExchange;
 pub use resolution::background::{SchemePhase, SchemeState};
 pub use scoring::{AcceptanceEval, ActionScorer, AlwaysAccept, AlwaysReject, ScoredAffordance};
 pub use types::{Beat, ConsiderationSpec, DriveAlignment, Effect, EncounterResult};
