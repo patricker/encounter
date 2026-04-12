@@ -72,6 +72,15 @@ impl MultiBeat {
             };
             result.push_beat(beat);
 
+            // Check for escalation-worthy conditions.
+            if let Some(esc) = crate::escalation::check_escalation(
+                result.beats.last().unwrap(),
+                result.beats.len() - 1,
+            ) {
+                result.escalation_requested = true;
+                result.escalation_requests.push(esc);
+            }
+
             if exit_requested {
                 break;
             }

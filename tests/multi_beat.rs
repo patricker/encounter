@@ -115,3 +115,42 @@ fn multi_beat_stops_early_on_no_actions() {
 
     assert!(result.beats.is_empty());
 }
+
+#[test]
+fn multi_beat_flags_escalation_on_high_impact_beat() {
+    // Create a catalog entry with high-impact effects (e.g., betray with delta -0.6)
+    let heavy_entry = CatalogEntry {
+        spec: AffordanceSpec {
+            name: "betray".into(),
+            domain: "personal".into(),
+            bindings: vec!["self".into(), "target".into()],
+            considerations: Vec::new(),
+            effects_on_accept: vec![Effect::RelationshipDelta {
+                axis: "trust".into(),
+                from: "target".into(),
+                to: "self".into(),
+                delta: -0.6,
+            }],
+            effects_on_reject: Vec::new(),
+            drive_alignment: Vec::new(),
+        },
+        precondition: String::new(),
+    };
+    let practice = PracticeSpec {
+        name: "confrontation".into(),
+        affordances: vec!["betray".into()],
+        turn_policy: TurnPolicy::RoundRobin,
+        duration_policy: DurationPolicy::MultiBeat { max_beats: 2 },
+        entry_condition_source: String::new(),
+    };
+    let protocol = MultiBeat;
+    let result = protocol.resolve(
+        &["alice".into(), "bob".into()],
+        &practice,
+        &[heavy_entry],
+        &FixedScorer(0.9),
+        &AlwaysAccept,
+    );
+    assert!(result.escalation_requested);
+    assert!(!result.escalation_requests.is_empty());
+}
