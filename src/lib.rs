@@ -20,6 +20,7 @@
 
 pub mod affordance;
 pub mod error;
+pub mod practice;
 pub mod types;
 
 pub use error::Error;
