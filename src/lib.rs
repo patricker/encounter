@@ -22,6 +22,7 @@ pub mod affordance;
 pub mod catalog;
 pub mod error;
 pub mod practice;
+pub mod scoring;
 pub mod types;
 
 pub use error::Error;
