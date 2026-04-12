@@ -18,6 +18,7 @@
 #![deny(missing_docs)]
 #![warn(clippy::all)]
 
+pub mod affordance;
 pub mod error;
 pub mod types;
 
