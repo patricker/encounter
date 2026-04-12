@@ -8,7 +8,7 @@ use crate::affordance::CatalogEntry;
 use std::collections::HashMap;
 
 /// An affordance that has been sifted and scored. Input to resolution protocols.
-/// Generic over precondition type P (from CatalogEntry<P>). Default is String.
+/// Generic over precondition type P (from `CatalogEntry<P>`). Default is String.
 #[derive(Debug, Clone)]
 pub struct ScoredAffordance<P = String> {
     /// The catalog entry being scored.
@@ -20,7 +20,7 @@ pub struct ScoredAffordance<P = String> {
 }
 
 /// Evaluates whether a responder accepts an action.
-/// Generic over P to match ScoredAffordance<P>.
+/// Generic over P to match `ScoredAffordance<P>`.
 pub trait AcceptanceEval<P = String>: Send + Sync {
     /// Returns true if the responder accepts the given scored action.
     fn evaluate(&self, responder: &str, action: &ScoredAffordance<P>) -> bool;

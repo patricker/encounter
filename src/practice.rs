@@ -3,10 +3,11 @@
 use serde::Deserialize;
 
 /// Controls whose turn it is at each beat of a practice.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum TurnPolicy {
     /// Participants take turns in a fixed rotation.
+    #[default]
     RoundRobin,
     /// Each initiating utterance is paired with a response (adjacency pair).
     AdjacencyPair,
@@ -14,17 +15,12 @@ pub enum TurnPolicy {
     Custom,
 }
 
-impl Default for TurnPolicy {
-    fn default() -> Self {
-        TurnPolicy::RoundRobin
-    }
-}
-
 /// Controls how long a practice runs.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum DurationPolicy {
     /// A single initiator/responder exchange, then the practice ends.
+    #[default]
     SingleExchange,
     /// Turn-based scene that continues until resolved or a beat cap is hit.
     MultiBeat {
@@ -33,12 +29,6 @@ pub enum DurationPolicy {
     },
     /// The practice runs until a resolution condition is satisfied.
     UntilResolved,
-}
-
-impl Default for DurationPolicy {
-    fn default() -> Self {
-        DurationPolicy::SingleExchange
-    }
 }
 
 /// Full specification for a practice, deserialized from a TOML definition file.
