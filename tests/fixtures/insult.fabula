@@ -1,0 +1,7 @@
+pattern insult {
+  stage rel {
+    rel.rel_source -> ?self
+    rel.rel_target -> ?target
+    ?self.pers_politeness <= 0.3
+  }
+}

@@ -1,0 +1,8 @@
+pattern betray {
+  stage rel {
+    rel.rel_source -> ?self
+    rel.rel_target -> ?target
+    rel.trust > 0.3
+    rel.friendship > 0.1
+  }
+}

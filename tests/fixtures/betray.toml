@@ -1,0 +1,23 @@
+name = "betray"
+domain = "personal"
+bindings = ["self", "target"]
+
+[[effects_on_accept]]
+kind = "relationship_delta"
+axis = "trust"
+from = "target"
+to = "self"
+delta = -0.6
+
+[[effects_on_accept]]
+kind = "emotional_event"
+target = "target"
+emotion = "anger"
+intensity = 0.7
+
+[[effects_on_reject]]
+kind = "relationship_delta"
+axis = "trust"
+from = "self"
+to = "target"
+delta = -0.1

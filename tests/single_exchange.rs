@@ -113,3 +113,87 @@ fn single_exchange_with_no_actions_produces_empty_result() {
 
     assert!(result.beats.is_empty());
 }
+
+#[test]
+fn single_exchange_betrayal_triggers_escalation() {
+    let betrayal = ScoredAffordance {
+        entry: CatalogEntry {
+            spec: AffordanceSpec {
+                name: "betray".into(),
+                domain: "personal".into(),
+                bindings: vec!["self".into(), "target".into()],
+                considerations: Vec::new(),
+                effects_on_accept: vec![
+                    Effect::RelationshipDelta {
+                        axis: "trust".into(),
+                        from: "target".into(),
+                        to: "self".into(),
+                        delta: -0.6,
+                    },
+                    Effect::EmotionalEvent {
+                        target: "target".into(),
+                        emotion: "anger".into(),
+                        intensity: 0.7,
+                    },
+                ],
+                effects_on_reject: Vec::new(),
+                drive_alignment: Vec::new(),
+            },
+            precondition: String::new(),
+        },
+        score: 0.9,
+        bindings: [
+            ("self".into(), "alice".into()),
+            ("target".into(), "bob".into()),
+        ]
+        .into_iter()
+        .collect(),
+    };
+    let protocol = SingleExchange;
+    let result = protocol.resolve("alice", "bob", &[betrayal], &AlwaysAccept);
+    assert!(
+        result.escalation_requested,
+        "betrayal should trigger escalation"
+    );
+    assert!(!result.escalation_requests.is_empty());
+}
+
+#[test]
+fn single_exchange_rejected_romance_fires_emotional_effects() {
+    let romance = ScoredAffordance {
+        entry: CatalogEntry {
+            spec: AffordanceSpec {
+                name: "romance".into(),
+                domain: "personal".into(),
+                bindings: vec!["self".into(), "target".into()],
+                considerations: Vec::new(),
+                effects_on_accept: vec![],
+                effects_on_reject: vec![
+                    Effect::EmotionalEvent {
+                        target: "self".into(),
+                        emotion: "distress".into(),
+                        intensity: 0.5,
+                    },
+                    Effect::EmotionalEvent {
+                        target: "self".into(),
+                        emotion: "shame".into(),
+                        intensity: 0.4,
+                    },
+                ],
+                drive_alignment: Vec::new(),
+            },
+            precondition: String::new(),
+        },
+        score: 0.6,
+        bindings: [
+            ("self".into(), "alice".into()),
+            ("target".into(), "bob".into()),
+        ]
+        .into_iter()
+        .collect(),
+    };
+    let protocol = SingleExchange;
+    let result = protocol.resolve("alice", "bob", &[romance], &AlwaysReject);
+    assert!(!result.beats[0].accepted);
+    assert_eq!(result.emotional_events.len(), 2);
+}

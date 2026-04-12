@@ -170,3 +170,28 @@ fn multi_beat_handles_empty_participants() {
     );
     assert!(result.beats.is_empty());
 }
+
+#[test]
+fn multi_beat_three_participants_cycle_correctly() {
+    let practice = PracticeSpec {
+        name: "feast".into(),
+        affordances: vec!["greet".into()],
+        turn_policy: TurnPolicy::RoundRobin,
+        duration_policy: DurationPolicy::MultiBeat { max_beats: 5 },
+        entry_condition_source: String::new(),
+    };
+    let protocol = MultiBeat;
+    let result = protocol.resolve(
+        &["alice".into(), "bob".into(), "clara".into()],
+        &practice,
+        &test_catalog_entries(),
+        &FixedScorer(0.7),
+        &AlwaysAccept,
+    );
+    assert_eq!(result.beats.len(), 5);
+    assert_eq!(result.beats[0].actor, "alice");
+    assert_eq!(result.beats[1].actor, "bob");
+    assert_eq!(result.beats[2].actor, "clara");
+    assert_eq!(result.beats[3].actor, "alice");
+    assert_eq!(result.beats[4].actor, "bob");
+}

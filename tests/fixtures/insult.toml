@@ -1,0 +1,22 @@
+name = "insult"
+domain = "social"
+bindings = ["self", "target"]
+
+[[effects_on_accept]]
+kind = "emotional_event"
+target = "target"
+emotion = "distress"
+intensity = 0.4
+
+[[effects_on_accept]]
+kind = "relationship_delta"
+axis = "respect"
+from = "target"
+to = "self"
+delta = -0.1
+
+[[effects_on_reject]]
+kind = "emotional_event"
+target = "self"
+emotion = "frustration"
+intensity = 0.2

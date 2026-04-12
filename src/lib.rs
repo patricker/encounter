@@ -91,4 +91,4 @@ pub use resolution::SingleExchange;
 pub use resolution::background::{SchemePhase, SchemeState};
 pub use scoring::{AcceptanceEval, ActionScorer, AlwaysAccept, AlwaysReject, ScoredAffordance};
 pub use types::{Beat, ConsiderationSpec, DriveAlignment, Effect, EncounterResult};
-pub use value_argument::{resolve_value_argument, ValueArgumentInput, ValueArgumentResult};
+pub use value_argument::{ValueArgumentInput, ValueArgumentResult, resolve_value_argument};

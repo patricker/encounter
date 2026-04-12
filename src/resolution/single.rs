@@ -40,6 +40,13 @@ impl SingleExchange {
             effects,
         };
         result.push_beat(beat);
+        if let Some(esc) = crate::escalation::check_escalation(
+            result.beats.last().unwrap(),
+            result.beats.len() - 1,
+        ) {
+            result.escalation_requested = true;
+            result.escalation_requests.push(esc);
+        }
         result
     }
 }

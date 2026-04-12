@@ -118,7 +118,7 @@ pub struct Beat {
 }
 
 /// Aggregated output of a resolved encounter.
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct EncounterResult {
     /// Characters who participated.
     pub participants: Vec<String>,
