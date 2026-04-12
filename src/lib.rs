@@ -18,6 +18,7 @@
 #![deny(missing_docs)]
 #![warn(clippy::all)]
 
+pub mod escalation;
 pub mod affordance;
 pub mod catalog;
 pub mod error;

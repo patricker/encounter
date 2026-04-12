@@ -135,7 +135,8 @@ pub struct EncounterResult {
     pub value_shifts: Vec<Effect>,
     /// Whether any participant requested escalation.
     pub escalation_requested: bool,
-    // TODO Task 11: add escalation_requests: Vec<EscalationRequest>
+    /// Escalation requests emitted during the encounter.
+    pub escalation_requests: Vec<crate::escalation::EscalationRequest>,
 }
 
 impl EncounterResult {
@@ -150,6 +151,7 @@ impl EncounterResult {
             emotional_events: Vec::new(),
             value_shifts: Vec::new(),
             escalation_requested: false,
+            escalation_requests: Vec::new(),
         }
     }
 
