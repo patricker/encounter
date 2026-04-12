@@ -11,7 +11,9 @@ pub enum TurnPolicy {
     RoundRobin,
     /// Each initiating utterance is paired with a response (adjacency pair).
     AdjacencyPair,
-    /// Turn order is determined by a consumer-supplied callback.
+    /// Consumer-provided turn logic. Currently falls back to round-robin
+    /// behavior in the built-in `MultiBeat` protocol. A future version will
+    /// add a `TurnSelector` trait callback.
     Custom,
 }
 

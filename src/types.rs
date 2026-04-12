@@ -118,6 +118,7 @@ pub struct Beat {
 }
 
 /// Aggregated output of a resolved encounter.
+#[derive(Debug)]
 pub struct EncounterResult {
     /// Characters who participated.
     pub participants: Vec<String>,
@@ -155,7 +156,13 @@ impl EncounterResult {
         }
     }
 
-    /// Record a beat and distribute its effects into the aggregate buckets.
+    /// Append a beat and categorize its effects into the aggregate buckets.
+    ///
+    /// Only `RelationshipDelta`, `KnowledgeTransfer`, `EmotionalEvent`, and
+    /// `ValueShift` effects are aggregated into the top-level buckets.
+    /// `MoodShift`, `NeedSatisfaction`, and `PracticeExit` effects are
+    /// preserved in the beat's `effects` vec but not duplicated into
+    /// separate aggregate fields.
     pub fn push_beat(&mut self, beat: Beat) {
         for effect in &beat.effects {
             match effect {

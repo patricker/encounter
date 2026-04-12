@@ -30,6 +30,10 @@ impl MultiBeat {
 
         let mut result = EncounterResult::new(participants.to_vec(), Some(practice.name.clone()));
 
+        if participants.is_empty() {
+            return result;
+        }
+
         // Filter catalog to affordances allowed by the practice.
         let allowed: Vec<CatalogEntry<P>> = catalog
             .iter()

@@ -1,9 +1,9 @@
 use encounter::catalog::load_catalog_dir;
-use std::path::Path;
 
 #[test]
 fn loads_fixture_catalog() {
-    let entries = load_catalog_dir(Path::new("tests/fixtures")).unwrap();
+    let fixtures = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures");
+    let entries = load_catalog_dir(&fixtures).unwrap();
     assert!(!entries.is_empty());
     let reveal = entries
         .iter()

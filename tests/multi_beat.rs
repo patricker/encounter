@@ -157,3 +157,16 @@ fn multi_beat_flags_escalation_on_high_impact_beat() {
     assert!(result.escalation_requested);
     assert!(!result.escalation_requests.is_empty());
 }
+
+#[test]
+fn multi_beat_handles_empty_participants() {
+    let protocol = MultiBeat;
+    let result = protocol.resolve(
+        &[],
+        &test_practice(),
+        &test_catalog_entries(),
+        &FixedScorer(0.7),
+        &AlwaysAccept,
+    );
+    assert!(result.beats.is_empty());
+}

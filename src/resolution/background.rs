@@ -47,7 +47,14 @@ impl SchemeState {
     }
 
     /// Advance progress. Returns true if scheme resolved this tick.
+    ///
+    /// Calling `advance` on an already-resolved scheme is a no-op (returns
+    /// `false` and does not change progress or phase). Phase transitions are
+    /// one-way: Preparation → Execution → Resolved.
     pub fn advance(&mut self, delta: f64) -> bool {
+        if self.phase == SchemePhase::Resolved {
+            return false;
+        }
         self.progress = (self.progress + delta).max(0.0);
         if self.phase == SchemePhase::Preparation && self.progress > 0.0 {
             self.phase = SchemePhase::Execution;
