@@ -19,6 +19,7 @@
 #![warn(clippy::all)]
 
 pub mod affordance;
+pub mod catalog;
 pub mod error;
 pub mod practice;
 pub mod types;
