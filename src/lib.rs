@@ -1,7 +1,12 @@
 //! # encounter
 //!
-//! Social interaction resolution engine. Resolves multi-character encounters
-//! via practice-scoped action catalogs and three resolution protocols.
+//! `encounter` resolves what happens when several characters interact in a
+//! scene. Give it the *what could happen* (a catalog of possible actions)
+//! and the *who is present* (the characters); it picks one of three
+//! protocols (one-shot exchange, turn-by-turn scene, or long-running
+//! scheme) and returns a structured *what happened* — beats and typed
+//! effects, replayable and testable. It does not generate prose, run a
+//! drama manager, or decide policy — those live in the layer above.
 //!
 //! ## Architecture
 //!
@@ -9,9 +14,17 @@
 //! `thiserror`, nothing else. Scoring and pattern evaluation are delegated
 //! to consumers via traits:
 //!
-//! - [`AcceptanceEval`] — determines whether a responder accepts an action.
-//! - [`ActionScorer`] — scores available actions for an actor (wraps fabula
-//!   sifting + salience scoring in consumer-specific bridge crates).
+//! - [`ActionScorer`] — scores available actions for an actor. This is
+//!   where your scoring policy lives — a utility/salience model, a GOAP
+//!   planner, or an LLM call.
+//! - [`AcceptanceEval`] — determines whether a responder accepts a chosen
+//!   action. This is where your fabula evaluator, reaction model, or
+//!   argumentation backend lives. *Fabula* here means the precondition
+//!   language encounter uses for action availability — typically a small
+//!   DSL the bridge crate parses.
+//!
+//! On each beat, the protocol asks [`ActionScorer`] for ranked actions and
+//! then asks [`AcceptanceEval`] whether the chosen action lands.
 //!
 //! ## Pluggable backends
 //!
@@ -21,7 +34,7 @@
 //! bridge. It implements both consumer traits using a Dung-framework-style
 //! argument graph with weighted-bipolar attacks and a β-budget acceptance
 //! dial. If you need more than the built-in [`AlwaysAccept`] / [`AlwaysReject`]
-//! test helpers, that's the bridge to reach for first.
+//! test helpers, start with that bridge.
 //!
 //! ## Quick example: SingleExchange
 //!
@@ -87,8 +100,9 @@
 //! - **`MultiBeat`** takes the speaker-rotation loop from Evans & Short,
 //!   *Versu* (IEEE TCIAIG 2014). Full social-practice goal stacks, role
 //!   tableaux, and obligations are out of scope.
-//! - **`BackgroundScheme`** takes the progress-bar shape from CK3's scheme
-//!   system. Agents, discovery rolls, and counter-actions are out of scope.
+//! - **`BackgroundScheme`** takes the progress-bar shape from the scheme
+//!   system in Crusader Kings III (CK3). Agents, discovery rolls, and
+//!   counter-actions are out of scope.
 //! - **`TurnPolicy::AdjacencyPair`** is the adjacency-pair model from
 //!   Sacks, Schegloff & Jefferson, *Lectures on Conversation* (1992).
 
