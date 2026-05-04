@@ -1,9 +1,9 @@
 //! Practice specification types: [`PracticeSpec`], [`TurnPolicy`], and [`DurationPolicy`].
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// Controls whose turn it is at each beat of a practice.
-#[derive(Debug, Clone, Default, PartialEq, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum TurnPolicy {
     /// Participants take turns in a fixed rotation.
@@ -11,14 +11,10 @@ pub enum TurnPolicy {
     RoundRobin,
     /// Each initiating utterance is paired with a response (adjacency pair).
     AdjacencyPair,
-    /// Consumer-provided turn logic. Currently falls back to round-robin
-    /// behavior in the built-in `MultiBeat` protocol. A future version will
-    /// add a `TurnSelector` trait callback.
-    Custom,
 }
 
 /// Controls how long a practice runs.
-#[derive(Debug, Clone, Default, PartialEq, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum DurationPolicy {
     /// A single initiator/responder exchange, then the practice ends.
@@ -34,7 +30,7 @@ pub enum DurationPolicy {
 }
 
 /// Full specification for a practice, deserialized from a TOML definition file.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct PracticeSpec {
     /// Human-readable name for this practice (e.g. "negotiation").
     pub name: String,

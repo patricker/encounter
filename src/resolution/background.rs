@@ -1,9 +1,14 @@
-//! BackgroundScheme resolution protocol — CK3-style long-duration plot.
+//! BackgroundScheme resolution protocol — a long-duration plot that
+//! accumulates progress over many ticks, then resolves to a single
+//! consequential beat. Inspired by the progress-bar shape of CK3 schemes;
+//! agents, discovery, and counter-actions are intentionally out of scope —
+//! consumers add those at the drama-manager layer.
 
 use crate::types::{Beat, Effect, EncounterResult};
+use serde::Serialize;
 
 /// Phase of a background scheme.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 pub enum SchemePhase {
     /// The scheme is being set up; no progress has been made yet.
     Preparation,
@@ -14,8 +19,13 @@ pub enum SchemePhase {
 }
 
 /// State of an ongoing background scheme.
-#[derive(Debug, Clone)]
-pub struct SchemeState {
+///
+/// Created with [`BackgroundScheme::new`], advanced over time via
+/// [`BackgroundScheme::advance`], and converted to a final
+/// [`EncounterResult`] via [`BackgroundScheme::to_result`] once the phase
+/// reaches [`SchemePhase::Resolved`].
+#[derive(Debug, Clone, Serialize)]
+pub struct BackgroundScheme {
     /// The character running the scheme.
     pub initiator: String,
     /// The character the scheme is directed against.
@@ -32,7 +42,7 @@ pub struct SchemeState {
     pub advantages: Vec<String>,
 }
 
-impl SchemeState {
+impl BackgroundScheme {
     /// Create a new scheme in the [`SchemePhase::Preparation`] phase with zero progress.
     pub fn new(initiator: String, target: String, scheme_type: String, threshold: f64) -> Self {
         Self {
@@ -71,7 +81,15 @@ impl SchemeState {
         self.advantages.push(label);
     }
 
-    /// Convert resolved scheme to EncounterResult with one beat.
+    /// Convert resolved scheme to an [`EncounterResult`] with one beat.
+    ///
+    /// The resulting beat carries either the success or failure effects
+    /// depending on whether the scheme reached [`SchemePhase::Resolved`].
+    /// The same escalation check used by [`crate::resolution::MultiBeat`]
+    /// runs on the resolution beat — high-magnitude relationship deltas or
+    /// emotion intensities populate `result.escalation_requests`, since the
+    /// resolution beat of a scheme is often the most consequential moment in
+    /// the encounter.
     pub fn to_result(
         &self,
         success_effects: Vec<Effect>,
@@ -94,6 +112,18 @@ impl SchemeState {
             effects,
         };
         result.push_beat(beat);
+
+        // Run the same escalation check MultiBeat uses — a scheme's
+        // resolution beat is typically the highest-stakes moment in the
+        // encounter, so silently dropping the signal would be a bug.
+        if let Some(esc) = crate::escalation::check_escalation(
+            result.beats.last().unwrap(),
+            result.beats.len() - 1,
+        ) {
+            result.escalation_requested = true;
+            result.escalation_requests.push(esc);
+        }
+
         result
     }
 }
@@ -101,11 +131,12 @@ impl SchemeState {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::escalation::FidelityHint;
     use crate::types::Effect;
 
     #[test]
     fn scheme_starts_in_preparation() {
-        let state = SchemeState::new(
+        let state = BackgroundScheme::new(
             "alice".to_string(),
             "bob".to_string(),
             "assassination".to_string(),
@@ -117,7 +148,7 @@ mod tests {
 
     #[test]
     fn advance_transitions_to_execution() {
-        let mut state = SchemeState::new(
+        let mut state = BackgroundScheme::new(
             "alice".to_string(),
             "bob".to_string(),
             "assassination".to_string(),
@@ -131,7 +162,7 @@ mod tests {
 
     #[test]
     fn advance_resolves_at_threshold() {
-        let mut state = SchemeState::new(
+        let mut state = BackgroundScheme::new(
             "alice".to_string(),
             "bob".to_string(),
             "blackmail".to_string(),
@@ -148,7 +179,7 @@ mod tests {
 
     #[test]
     fn setback_cannot_go_below_zero() {
-        let mut state = SchemeState::new(
+        let mut state = BackgroundScheme::new(
             "alice".to_string(),
             "bob".to_string(),
             "seduction".to_string(),
@@ -160,8 +191,8 @@ mod tests {
     }
 
     #[test]
-    fn to_result_produces_one_beat() {
-        let mut state = SchemeState::new(
+    fn to_result_produces_one_beat_and_escalates() {
+        let mut state = BackgroundScheme::new(
             "alice".to_string(),
             "bob".to_string(),
             "spy_ring".to_string(),
@@ -183,5 +214,35 @@ mod tests {
         assert!(result.beats[0].accepted);
         assert_eq!(result.beats[0].effects.len(), 1);
         assert_eq!(result.relationship_deltas.len(), 1);
+
+        // The -0.5 trust delta should trigger an Active-tier escalation.
+        assert!(result.escalation_requested);
+        assert_eq!(result.escalation_requests.len(), 1);
+        assert_eq!(
+            result.escalation_requests[0].suggested_fidelity,
+            FidelityHint::Active
+        );
+    }
+
+    #[test]
+    fn to_result_does_not_escalate_on_mild_effects() {
+        let mut state = BackgroundScheme::new(
+            "alice".to_string(),
+            "bob".to_string(),
+            "courtship".to_string(),
+            1.0,
+        );
+        state.advance(1.0);
+
+        let success_effects = vec![Effect::RelationshipDelta {
+            axis: "affection".to_string(),
+            from: "bob".to_string(),
+            to: "alice".to_string(),
+            delta: 0.1,
+        }];
+        let result = state.to_result(success_effects, vec![]);
+
+        assert!(!result.escalation_requested);
+        assert!(result.escalation_requests.is_empty());
     }
 }

@@ -13,6 +13,16 @@
 //! - [`ActionScorer`] — scores available actions for an actor (wraps fabula
 //!   sifting + salience scoring in consumer-specific bridge crates).
 //!
+//! ## Pluggable backends
+//!
+//! The canonical reasoning backend is the
+//! [`argumentation`](https://crates.io/crates/argumentation) crate, via the
+//! [`encounter-argumentation`](https://crates.io/crates/encounter-argumentation)
+//! bridge. It implements both consumer traits using a Dung-framework-style
+//! argument graph with weighted-bipolar attacks and a β-budget acceptance
+//! dial. If you need more than the built-in [`AlwaysAccept`] / [`AlwaysReject`]
+//! test helpers, that's the bridge to reach for first.
+//!
 //! ## Quick example: SingleExchange
 //!
 //! ```
@@ -52,6 +62,9 @@
 //! assert!(result.beats[0].accepted);
 //! ```
 //!
+//! Runnable versions of all three protocols live in the `examples/` directory
+//! of the source repository.
+//!
 //! ## Catalog loading
 //!
 //! ```no_run
@@ -62,12 +75,22 @@
 //! println!("loaded {} affordances", entries.len());
 //! ```
 //!
-//! ## References
+//! ## Inspirations
 //!
-//! - Evans & Short, *Versu* (IEEE TCIAIG 2014) — MultiBeat turn model
-//! - McCoy et al., *Comme il Faut* (Game AI Pro 3) — SingleExchange
-//! - CK3 interactions/schemes — BackgroundScheme
-//! - Sacks, *Lectures on Conversation* (1992) — turn-taking
+//! The protocols are small, opinionated reductions of shapes that have
+//! shipped or been published. Each one is named for what it borrows, not
+//! for what it reproduces faithfully:
+//!
+//! - **`SingleExchange`** reduces the intent/reaction step from McCoy et
+//!   al., *Comme il Faut* (Game AI Pro 3, ch. 43). Full CiF social-games are
+//!   out of scope.
+//! - **`MultiBeat`** takes the speaker-rotation loop from Evans & Short,
+//!   *Versu* (IEEE TCIAIG 2014). Full social-practice goal stacks, role
+//!   tableaux, and obligations are out of scope.
+//! - **`BackgroundScheme`** takes the progress-bar shape from CK3's scheme
+//!   system. Agents, discovery rolls, and counter-actions are out of scope.
+//! - **`TurnPolicy::AdjacencyPair`** is the adjacency-pair model from
+//!   Sacks, Schegloff & Jefferson, *Lectures on Conversation* (1992).
 
 #![deny(missing_docs)]
 #![warn(clippy::all)]
@@ -88,7 +111,7 @@ pub use escalation::{EscalationRequest, FidelityHint, check_escalation};
 pub use practice::{DurationPolicy, PracticeSpec, TurnPolicy};
 pub use resolution::MultiBeat;
 pub use resolution::SingleExchange;
-pub use resolution::background::{SchemePhase, SchemeState};
+pub use resolution::background::{BackgroundScheme, SchemePhase};
 pub use scoring::{AcceptanceEval, ActionScorer, AlwaysAccept, AlwaysReject, ScoredAffordance};
 pub use types::{Beat, ConsiderationSpec, DriveAlignment, Effect, EncounterResult};
 pub use value_argument::{ValueArgumentInput, ValueArgumentResult, resolve_value_argument};

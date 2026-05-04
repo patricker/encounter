@@ -92,7 +92,6 @@ impl MultiBeat {
             speaker_idx = match practice.turn_policy {
                 TurnPolicy::RoundRobin => speaker_idx + 1,
                 TurnPolicy::AdjacencyPair => responder_idx,
-                TurnPolicy::Custom => speaker_idx + 1,
             };
         }
         result

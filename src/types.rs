@@ -1,12 +1,12 @@
 //! Core data types shared across the crate.
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// An effect produced by a social interaction beat.
 ///
 /// Effects are tagged with `kind` in serialized form and categorized into
 /// aggregate buckets on [`EncounterResult`] by [`EncounterResult::push_beat`].
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum Effect {
     /// One character conveys a belief to another.
@@ -79,7 +79,7 @@ pub enum Effect {
 }
 
 /// A drive that motivates a character's participation in an encounter.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct DriveAlignment {
     /// The drive category (e.g. "autonomy", "belonging").
     pub kind: String,
@@ -88,7 +88,7 @@ pub struct DriveAlignment {
 }
 
 /// A single consideration in a utility-scoring curve set.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ConsiderationSpec {
     /// Unique identifier for this consideration.
     pub id: String,
@@ -104,8 +104,8 @@ pub struct ConsiderationSpec {
 /// A single resolved action exchange within an encounter.
 ///
 /// Beats are constructed by resolution protocols rather than deserialized from
-/// external data, so they do not implement `Deserialize`.
-#[derive(Debug, Clone, PartialEq)]
+/// external data, so they only implement `Serialize`.
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct Beat {
     /// The character performing the action.
     pub actor: String,
@@ -118,7 +118,11 @@ pub struct Beat {
 }
 
 /// Aggregated output of a resolved encounter.
-#[derive(Debug, Clone, PartialEq)]
+///
+/// Each `Effect` variant has a corresponding aggregate bucket; consumers may
+/// either walk `beats[*].effects` for fully ordered context, or read the
+/// per-variant buckets when only one effect kind is needed.
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct EncounterResult {
     /// Characters who participated.
     pub participants: Vec<String>,
@@ -132,8 +136,14 @@ pub struct EncounterResult {
     pub knowledge_transfers: Vec<Effect>,
     /// All [`Effect::EmotionalEvent`] effects from all beats.
     pub emotional_events: Vec<Effect>,
+    /// All [`Effect::MoodShift`] effects from all beats.
+    pub mood_shifts: Vec<Effect>,
+    /// All [`Effect::NeedSatisfaction`] effects from all beats.
+    pub need_satisfactions: Vec<Effect>,
     /// All [`Effect::ValueShift`] effects from all beats.
     pub value_shifts: Vec<Effect>,
+    /// All [`Effect::PracticeExit`] effects from all beats.
+    pub practice_exits: Vec<Effect>,
     /// Whether any participant requested escalation.
     pub escalation_requested: bool,
     /// Escalation requests emitted during the encounter.
@@ -150,19 +160,19 @@ impl EncounterResult {
             relationship_deltas: Vec::new(),
             knowledge_transfers: Vec::new(),
             emotional_events: Vec::new(),
+            mood_shifts: Vec::new(),
+            need_satisfactions: Vec::new(),
             value_shifts: Vec::new(),
+            practice_exits: Vec::new(),
             escalation_requested: false,
             escalation_requests: Vec::new(),
         }
     }
 
-    /// Append a beat and categorize its effects into the aggregate buckets.
+    /// Append a beat and categorize each effect into its corresponding bucket.
     ///
-    /// Only `RelationshipDelta`, `KnowledgeTransfer`, `EmotionalEvent`, and
-    /// `ValueShift` effects are aggregated into the top-level buckets.
-    /// `MoodShift`, `NeedSatisfaction`, and `PracticeExit` effects are
-    /// preserved in the beat's `effects` vec but not duplicated into
-    /// separate aggregate fields.
+    /// Every `Effect` variant is mirrored into a typed aggregate field; the
+    /// beat's full `effects` vec is also preserved on `beats`.
     pub fn push_beat(&mut self, beat: Beat) {
         for effect in &beat.effects {
             match effect {
@@ -175,12 +185,18 @@ impl EncounterResult {
                 Effect::EmotionalEvent { .. } => {
                     self.emotional_events.push(effect.clone());
                 }
+                Effect::MoodShift { .. } => {
+                    self.mood_shifts.push(effect.clone());
+                }
+                Effect::NeedSatisfaction { .. } => {
+                    self.need_satisfactions.push(effect.clone());
+                }
                 Effect::ValueShift { .. } => {
                     self.value_shifts.push(effect.clone());
                 }
-                Effect::MoodShift { .. }
-                | Effect::NeedSatisfaction { .. }
-                | Effect::PracticeExit { .. } => {}
+                Effect::PracticeExit { .. } => {
+                    self.practice_exits.push(effect.clone());
+                }
             }
         }
         self.beats.push(beat);
@@ -277,5 +293,65 @@ mod tests {
         assert_eq!(result.relationship_deltas.len(), 1);
         assert_eq!(result.emotional_events.len(), 0);
         assert_eq!(result.value_shifts.len(), 0);
+    }
+
+    #[test]
+    fn encounter_result_categorizes_all_seven_variants() {
+        let mut result = EncounterResult::new(vec!["alice".into(), "bob".into()], None);
+
+        let beat = Beat {
+            actor: "alice".into(),
+            action: "complex_action".into(),
+            accepted: true,
+            effects: vec![
+                Effect::RelationshipDelta {
+                    axis: "trust".into(),
+                    from: "alice".into(),
+                    to: "bob".into(),
+                    delta: 0.1,
+                },
+                Effect::KnowledgeTransfer {
+                    from: "alice".into(),
+                    to: "bob".into(),
+                    claim: "test".into(),
+                    provenance: None,
+                    initial_confidence: None,
+                },
+                Effect::EmotionalEvent {
+                    target: "bob".into(),
+                    emotion: "joy".into(),
+                    intensity: 0.5,
+                },
+                Effect::MoodShift {
+                    target: "bob".into(),
+                    axis: "calm".into(),
+                    delta: 0.2,
+                },
+                Effect::NeedSatisfaction {
+                    target: "bob".into(),
+                    need: "belonging".into(),
+                    amount: 0.3,
+                },
+                Effect::ValueShift {
+                    target: "bob".into(),
+                    value: "honesty".into(),
+                    delta: 0.05,
+                },
+                Effect::PracticeExit {
+                    actor: "bob".into(),
+                    reason: Some("satisfied".into()),
+                },
+            ],
+        };
+
+        result.push_beat(beat);
+
+        assert_eq!(result.relationship_deltas.len(), 1);
+        assert_eq!(result.knowledge_transfers.len(), 1);
+        assert_eq!(result.emotional_events.len(), 1);
+        assert_eq!(result.mood_shifts.len(), 1);
+        assert_eq!(result.need_satisfactions.len(), 1);
+        assert_eq!(result.value_shifts.len(), 1);
+        assert_eq!(result.practice_exits.len(), 1);
     }
 }

@@ -20,14 +20,23 @@ pub struct ScoredAffordance<P = String> {
 }
 
 /// Evaluates whether a responder accepts an action.
-/// Generic over P to match `ScoredAffordance<P>`.
-pub trait AcceptanceEval<P = String>: Send + Sync {
+///
+/// Generic over `P` to match `ScoredAffordance<P>`. Consumers that need to
+/// share an `AcceptanceEval` across threads should add `+ Send + Sync` at
+/// the use site (`&(dyn AcceptanceEval<P> + Send + Sync)`); the trait itself
+/// does not require it, so single-threaded scorers holding `Rc<T>` /
+/// `Cell<T>` / `RefCell<T>` are fine.
+pub trait AcceptanceEval<P = String> {
     /// Returns true if the responder accepts the given scored action.
     fn evaluate(&self, responder: &str, action: &ScoredAffordance<P>) -> bool;
 }
 
 /// Scores available affordances for an actor.
-pub trait ActionScorer<P = String>: Send + Sync {
+///
+/// Same threading note as [`AcceptanceEval`]: the trait does not require
+/// `Send + Sync`; add the bound at the use site if cross-thread sharing is
+/// needed.
+pub trait ActionScorer<P = String> {
     /// Returns a scored and ordered list of affordances available to the actor.
     fn score_actions(
         &self,

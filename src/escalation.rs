@@ -1,9 +1,10 @@
 //! Escalation request types and detection logic.
 
 use crate::types::Beat;
+use serde::Serialize;
 
 /// A request to escalate scene fidelity, emitted during a multi-beat encounter.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct EscalationRequest {
     /// What triggered the escalation.
     pub trigger: String,
@@ -14,7 +15,7 @@ pub struct EscalationRequest {
 }
 
 /// Advisory fidelity level.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 pub enum FidelityHint {
     /// No change in fidelity recommended.
     Unchanged,

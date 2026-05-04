@@ -2,9 +2,13 @@
 name = "encounter"
 version = "0.1.0"
 edition = "2024"
+rust-version = "1.85"
 description = "Social interaction resolution engine: practice-scoped affordances, multi-protocol encounter resolution"
 license = "MIT OR Apache-2.0"
 readme = "README.md"
+repository = "https://github.com/patricker/encounter"
+homepage = "https://github.com/patricker/encounter"
+documentation = "https://docs.rs/encounter"
 keywords = ["social-simulation", "encounter", "interaction", "narrative", "game-ai"]
 categories = ["algorithms", "game-development"]
 

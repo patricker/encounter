@@ -4,6 +4,6 @@ pub mod background;
 pub mod multi_beat;
 pub mod single;
 
-pub use background::{SchemePhase, SchemeState};
+pub use background::{BackgroundScheme, SchemePhase};
 pub use multi_beat::MultiBeat;
 pub use single::SingleExchange;

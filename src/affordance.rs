@@ -1,10 +1,10 @@
 //! Affordance catalog types: [`AffordanceSpec`] and [`CatalogEntry`].
 
 use crate::types::{ConsiderationSpec, DriveAlignment, Effect};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// Metadata for a single action, deserialized from a catalog TOML file.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct AffordanceSpec {
     /// Human-readable name for this action.
     pub name: String,
@@ -154,7 +154,6 @@ mod tests {
         };
 
         assert_eq!(entry.spec.name, "wave");
-        // Verify the unit precondition is held (always passes — this is a compile-time check)
-        let _ = entry.precondition;
+        let () = entry.precondition;
     }
 }
