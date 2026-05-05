@@ -1,15 +1,17 @@
 # encounter
 
-[![crates.io](https://img.shields.io/crates/v/encounter.svg)](https://crates.io/crates/encounter)
-[![docs.rs](https://img.shields.io/docsrs/encounter)](https://docs.rs/encounter)
-[![license](https://img.shields.io/crates/l/encounter.svg)](#license)
+[![crates.io](https://img.shields.io/crates/v/encounter-rs.svg)](https://crates.io/crates/encounter-rs)
+[![docs.rs](https://img.shields.io/docsrs/encounter-rs)](https://docs.rs/encounter-rs)
+[![license](https://img.shields.io/crates/l/encounter-rs.svg)](#license)
 
 `encounter` resolves what happens when several characters interact in a scene. Give it the *what could happen* (a catalog of possible actions) and the *who is present* (the characters); it picks one of three protocols (one-shot exchange, turn-by-turn scene, or long-running scheme) and returns a structured *what happened* — beats and typed effects, replayable and testable. It does not generate prose, run a drama manager, or decide policy — those live in the layer above.
 
 ```toml
 [dependencies]
-encounter = "0.1"
+encounter-rs = "0.1"
 ```
+
+The package is published as `encounter-rs` (the unsuffixed name was squatted by an unrelated placeholder); the library name is `encounter`, so user code is unchanged: `use encounter::resolution::SingleExchange;`.
 
 ## Quickstart
 

@@ -1,5 +1,5 @@
 [package]
-name = "encounter"
+name = "encounter-rs"
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.85"
@@ -8,13 +8,19 @@ license = "MIT OR Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/patricker/encounter"
 homepage = "https://github.com/patricker/encounter"
-documentation = "https://docs.rs/encounter"
+documentation = "https://docs.rs/encounter-rs"
 keywords = ["social-simulation", "encounter", "interaction", "narrative", "game-ai"]
 categories = ["algorithms", "game-development"]
 exclude = [
     ".claude/",
     "tests/real_catalog.rs",
 ]
+
+# The published crate is `encounter-rs` (the unsuffixed name was already
+# squatted by an unrelated 0.0.0 placeholder). Keep the library name as
+# `encounter` so user code stays `use encounter::*`.
+[lib]
+name = "encounter"
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
